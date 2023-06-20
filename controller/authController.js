@@ -88,13 +88,12 @@ const loginUser = async (req, res) => {
           }
         }
       );
-      //maybe check if it succeeds..
       res.setHeader("set-cookie", [
         `JWT_TOKEN=${token}; httponly; samesite=lax`
       ]);
       res.send({
         status: "Success",
-        refreshToken: refreshtoken
+        refreshToken: token
       });
     } else {
       res.send({ error: "Incorrect username or password" });
@@ -161,7 +160,10 @@ const homeFeeds = async (req, res) => {
 };
 const userTweets = async (req, res) => {
   const { tweet } = req.body;
-  const token = req.cookies.JWT_TOKEN;
+  // const token = req.cookies.JWT_TOKEN;
+  var token = req.headers.authorization;
+  token = token.split(" ")[1]
+  console.log("SERVER COOKIE ",token)
   if (token) {
     const user = await validateToken(token, JWT_SECRET);
     if (user === null) {

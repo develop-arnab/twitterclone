@@ -162,44 +162,28 @@ const userTweets = async (req, res) => {
   const { tweet } = req.body;
   // const token = req.cookies.JWT_TOKEN;
   var token = req.headers.authorization;
-  token = token.split(" ")[1]
-  console.log("SERVER COOKIE ",token)
-  if (token) {
-    const user = await validateToken(token, JWT_SECRET);
-    if (user === null) {
-      res.send({
-        message: "Invalid Token"
-      });
-    } else {
-      try {
-        console.log("user ", user);
-        const response = await Tweet.create({
-          tweet,
-          author: user.name
-        });
-        console.log("Tweet created successfully: ", response);
-        res.send({
-          message: "You tweeted "
-        });
-      } catch (error) {
-        if (error.code === 11000) {
-          // duplicate key
-          return res.json({
-            status: "error",
-            error: "Username already in use"
-          });
-        }
-        throw error;
-      }
-      // res.send({
-      //   message: "Well Hello There"
-      // });
-    }
-  } //else ask the user to login
-  else {
-    res.send({
-      message: "Invalid"
+  token = token.split(" ")[1];
+  console.log("SERVER COOKIE userTweets ", token);
+  const user = await validateToken(token, JWT_SECRET);
+  try {
+    console.log("user ", user);
+    const response = await Tweet.create({
+      tweet,
+      author: user.name
     });
+    console.log("Tweet created successfully: ", response);
+    res.send({
+      message: "You tweeted "
+    });
+  } catch (error) {
+    if (error.code === 11000) {
+      // duplicate key
+      return res.json({
+        status: "error",
+        error: "Username already in use"
+      });
+    }
+    throw error;
   }
 };
 const followUser = async (req, res) => {
@@ -216,8 +200,9 @@ const followUser = async (req, res) => {
         console.log("user ", user);
         const response = await Following.findOneAndUpdate(
           {
-            username: user.name 
-          },{ $push: { following: follwed_user } },
+            username: user.name
+          },
+          { $push: { following: follwed_user } },
           { upsert: true }
         );
         console.log("Followed: ", response);

@@ -13,7 +13,7 @@ router.get("/home", homeFeeds);
 
 router.post("/tweet", requireAuth , userTweets);
 
-router.post("/follow", followUser);
+router.post("/follow", requireAuth, followUser);
 
 module.exports = {
     routes: router,

@@ -188,46 +188,32 @@ const userTweets = async (req, res) => {
 };
 const followUser = async (req, res) => {
   const { follwed_user } = req.body;
-  const token = req.cookies.JWT_TOKEN;
-  if (token) {
-    const user = await validateToken(token, JWT_SECRET);
-    if (user === null) {
-      res.send({
-        message: "Invalid Token"
-      });
-    } else {
-      try {
-        console.log("user ", user);
-        const response = await Following.findOneAndUpdate(
-          {
-            username: user.name
-          },
-          { $push: { following: follwed_user } },
-          { upsert: true }
-        );
-        console.log("Followed: ", response);
-        res.send({
-          message: "You Followed "
-        });
-      } catch (error) {
-        if (error.code === 11000) {
-          // duplicate key
-          return res.json({
-            status: "error",
-            error: "Username already in use"
-          });
-        }
-        throw error;
-      }
-      // res.send({
-      //   message: "Well Hello There"
-      // });
-    }
-  } //else ask the user to login
-  else {
+  var token = req.headers.authorization;
+  token = token.split(" ")[1];
+  console.log("SERVER COOKIE userTweets ", token);
+  const user = await validateToken(token, JWT_SECRET);
+  try {
+    console.log("user ", user);
+    const response = await Following.findOneAndUpdate(
+      {
+        username: user.name
+      },
+      { $push: { following: follwed_user } },
+      { upsert: true }
+    );
+    console.log("Followed: ", response);
     res.send({
-      message: "Invalid"
+      message: "You Followed "
     });
+  } catch (error) {
+    if (error.code === 11000) {
+      // duplicate key
+      return res.json({
+        status: "error",
+        error: "Username already in use"
+      });
+    }
+    throw error;
   }
 };
 async function validateToken(token, secret) {
